@@ -4,9 +4,12 @@ import requests
 import json
 import time
 import threading
+from datetime import datetime
 from dotenv import load_dotenv
 
 def get_currency_data() -> object:
+    global date
+    date = datetime.now()
     parameters = {"api_key": os.getenv("API_KEY"), "format": "json", "to": "USD", "amount": "1"}
     url = "https://api.getgeoapi.com/v2/currency/convert"
     response = requests.get(url, parameters)
@@ -23,20 +26,25 @@ def get_data():
 def build_currency_message(dataa) -> str:
     message = "```diff\n"
     if float(dataa['amount']) > float(dataa['rates']['USD']['rate']):
-        message += "- [EUR: "
+        message += "-        [EUR: "
     else:
-        message += "+ [EUR: "
+        message += "+        [EUR: "
     message += dataa['amount']
     message += "]\n"
     if float(dataa['amount']) > float(dataa['rates']['USD']['rate']):
-        message += "+ [USD: "
+        message += "+        [USD: "
     else:
-        message += "- [USD: "
+        message += "-        [USD: "
     message += dataa['rates']['USD']['rate']
-    message += "]```"
+    message += "]\n"
+    message += "Last Refresh: "
+    message += date.strftime("%H:%M:%S")
+    message += "```"
     return message
 
 data = {}
+date = ""
+
 def main():
     load_dotenv()
     global data
