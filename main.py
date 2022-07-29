@@ -20,7 +20,7 @@ def set_date():
     global date
     date = datetime.now()
 
-# Get Fata From GetGeoApi Api
+# Get Data From GetGeoApi Api
 def get_currency_data() -> object:
     set_date()
     parameters = {"api_key": os.getenv("API_KEY"), "format": "json", "amount": "1"}
