@@ -1,5 +1,4 @@
 # Currency Reporter Discord Bot
----
 ### Required packages:
 ```
 pip install requests
