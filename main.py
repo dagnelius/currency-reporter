@@ -11,25 +11,37 @@ def get_currency_data() -> object:
     data = json.loads(response.text)
     return data
 
-load_dotenv()
-client = discord.Client()
+def build_currency_message(data) -> str:
+    message = data['amount']
+    message += data['base_currency_name']
+    message += " -> "
+    message += data['rates']['USD']['rate']
+    message += data['rates']['USD']['currency_name']
+    return message
 
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
+def main():
+    load_dotenv()
+    client = discord.Client()
 
-    if message.content.startswith('!usd'):
-        currency_data = get_currency_data()
+    @client.event
+    async def on_ready():
+        print("Currency Reporter is Ready!\n")
 
-        if currency_data['status'] == "success":
-            currency_message = currency_data['amount']
-            currency_message += currency_data['base_currency_name']
-            currency_message += " -> "
-            currency_message += currency_data['rates']['USD']['rate']
-            currency_message += currency_data['rates']['USD']['currency_name']
-            await message.channel.send(currency_message)
-        else:
-            await message.channel.send("No currency data!")
+    @client.event
+    async def on_message(message):
+        if message.author == client.user:
+            return
 
-client.run(os.getenv("TOKEN"))
+        if message.content.startswith('$$$'):
+            currency_data = get_currency_data()
+            if currency_data['status'] == "success":
+                await message.channel.send(build_currency_message(currency_data))
+            else:
+                await message.channel.send("No currency data!")
+
+    client.run(os.getenv("TOKEN"))
+
+
+if __name__ == "__main__":
+    main()
+
