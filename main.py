@@ -100,24 +100,13 @@ def main():
 '''
             await message.channel.send(return_content)
 
-        if message.content.startswith(f'{prefix}EUR-USD'):
+        if message.content.startswith(f'{prefix}EUR-'):
             currency_data = data
             if currency_data['status'] == "success":
-                await message.channel.send(build_message(currency_data, 'USD'))
-            else:
-                await message.channel.send("No currency data!")
-
-        if message.content.startswith(f'{prefix}EUR-GBP'):
-            currency_data = data
-            if currency_data['status'] == "success":
-                await message.channel.send(build_message(currency_data, 'GBP'))
-            else:
-                await message.channel.send("No currency data!")
-
-        if message.content.startswith(f'{prefix}EUR-PLN'):
-            currency_data = data
-            if currency_data['status'] == "success":
-                await message.channel.send(build_message(currency_data, 'PLN'))
+                if not message.content[5:8] in currency_data['rates']:
+                    await message.channel.send(f"Currency {message.content[5:8]} not found!")
+                else:
+                    await message.channel.send(build_message(currency_data, message.content[5:8]))
             else:
                 await message.channel.send("No currency data!")
 
@@ -128,4 +117,4 @@ if __name__ == "__main__":
     main()
 
 
-# TODO: OOP, RESERVED SPACE, MULTICURRENCY SUPPORT
+# TODO: OOP, RESERVED SPACE
