@@ -12,11 +12,19 @@ def get_currency_data() -> object:
     return data
 
 def build_currency_message(data) -> str:
-    message = data['amount']
-    message += data['base_currency_name']
-    message += " -> "
+    message = "```diff\n"
+    if float(data['amount']) > float(data['rates']['USD']['rate']):
+        message += "- [EUR: "
+    else:
+        message += "+ [EUR: "
+    message += data['amount']
+    message += "]\n"
+    if float(data['amount']) > float(data['rates']['USD']['rate']):
+        message += "+ [USD: "
+    else:
+        message += "- [USD: "
     message += data['rates']['USD']['rate']
-    message += data['rates']['USD']['currency_name']
+    message += "]```"
     return message
 
 def main():
@@ -44,4 +52,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
