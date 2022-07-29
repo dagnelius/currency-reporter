@@ -47,18 +47,21 @@ def get_data():
 # Build Response Message
 def build_message(json_data, currency) -> str:
     message = "```diff\n"
+    message += f"-------------[EUR: {currency}---]\n"
     if float(json_data['amount']) > float(json_data['rates'][currency]['rate']):
-        message += "-        [EUR: "
+        message += "-            [EUR: "
     else:
-        message += "+        [EUR: "
+        message += "+            [EUR: "
     message += json_data['amount'] + "]\n"
     if float(json_data['amount']) > float(json_data['rates'][currency]['rate']):
-        message += f"+        [{currency}: "
+        message += f"+            [{currency}: "
     else:
-        message += f"-        [{currency}: "
+        message += f"-            [{currency}: "
     message += json_data['rates'][currency]['rate'] + "]\n"
-    refresh_time = "Last Refresh: " + date.strftime("%H:%M:%S")
+    message += "--------------------------\n"
+    refresh_time = "--Last Refresh: " + date.strftime("%H:%M:%S") + '--'
     message += refresh_time
+    message += "\n--------------------------"
     message += "```"
     return message
 
