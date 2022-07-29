@@ -14,6 +14,7 @@ load_dotenv()
 # Set Default Values
 data = {}
 date = ""
+prefix = "-"
 
 # Set Global Variable Date
 def set_date():
@@ -83,12 +84,12 @@ def main():
         if message.author == client.user:
             return
 
-        if message.content.startswith('$help'):
-            return_content = '''
+        if message.content.startswith(f'{prefix}help'):
+            return_content = f'''
 ```diff
 ---------------------[HELP]
--Syntax:     [${BASE}-{TO}]
--Example:        [$EUR-USD]
+-Syntax:         [{prefix}BASE-TO]
+-Example:        [{prefix}EUR-USD]
 ---------------------------
 +Available Base Currencies:
 +                     [EUR]
@@ -99,21 +100,21 @@ def main():
 '''
             await message.channel.send(return_content)
 
-        if message.content.startswith('$EUR-USD'):
+        if message.content.startswith(f'{prefix}EUR-USD'):
             currency_data = data
             if currency_data['status'] == "success":
                 await message.channel.send(build_message(currency_data, 'USD'))
             else:
                 await message.channel.send("No currency data!")
 
-        if message.content.startswith('$EUR-GBP'):
+        if message.content.startswith(f'{prefix}EUR-GBP'):
             currency_data = data
             if currency_data['status'] == "success":
                 await message.channel.send(build_message(currency_data, 'GBP'))
             else:
                 await message.channel.send("No currency data!")
 
-        if message.content.startswith('$EUR-PLN'):
+        if message.content.startswith(f'{prefix}EUR-PLN'):
             currency_data = data
             if currency_data['status'] == "success":
                 await message.channel.send(build_message(currency_data, 'PLN'))
