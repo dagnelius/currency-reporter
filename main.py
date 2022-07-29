@@ -1,44 +1,53 @@
-import os
 import discord
-import requests
 import json
-import time
+import os
 import threading
+import time
 from datetime import datetime
+
+import requests
 from dotenv import load_dotenv
 
-def get_currency_data() -> object:
+def set_date():
     global date
     date = datetime.now()
-    parameters = {"api_key": os.getenv("API_KEY"), "format": "json", "to": "USD", "amount": "1"}
+
+def get_currency_data() -> object:
+    set_date()
+    parameters = {"api_key": os.getenv("API_KEY"), "format": "json", "amount": "1"}
     url = "https://api.getgeoapi.com/v2/currency/convert"
     response = requests.get(url, parameters)
-    data_returned = json.loads(response.text)
-    return data_returned
+    if response.status_code != 200:
+        return
+    json_response = json.loads(response.text)
+    return json_response
 
 def get_data():
     start_time = time.time()
     while True:
         global data
-        data = get_currency_data()
-        time.sleep(3600.0 - ((time.time() - start_time) % 3600.0))
+        safe_data = get_currency_data()
+        if safe_data:
+            data = safe_data
+            time.sleep(1800.0 - ((time.time() - start_time) % 1800.0))
+        else:
+            data = data
+            time.sleep(1800.0 - ((time.time() - start_time) % 1800.0))
 
-def build_currency_message(dataa) -> str:
+def build_message(json_data, currency) -> str:
     message = "```diff\n"
-    if float(dataa['amount']) > float(dataa['rates']['USD']['rate']):
+    if float(json_data['amount']) > float(json_data['rates'][currency]['rate']):
         message += "-        [EUR: "
     else:
         message += "+        [EUR: "
-    message += dataa['amount']
-    message += "]\n"
-    if float(dataa['amount']) > float(dataa['rates']['USD']['rate']):
-        message += "+        [USD: "
+    message += json_data['amount'] + "]\n"
+    if float(json_data['amount']) > float(json_data['rates'][currency]['rate']):
+        message += f"+        [{currency}: "
     else:
-        message += "-        [USD: "
-    message += dataa['rates']['USD']['rate']
-    message += "]\n"
-    message += "Last Refresh: "
-    message += date.strftime("%H:%M:%S")
+        message += f"-        [{currency}: "
+    message += json_data['rates'][currency]['rate'] + "]\n"
+    refresh_time = "Last Refresh: " + date.strftime("%H:%M:%S")
+    message += refresh_time
     message += "```"
     return message
 
@@ -62,10 +71,24 @@ def main():
         if message.author == client.user:
             return
 
-        if message.content.startswith('$$$'):
+        if message.content.startswith('$EUR-USD'):
             currency_data = data
             if currency_data['status'] == "success":
-                await message.channel.send(build_currency_message(currency_data))
+                await message.channel.send(build_message(currency_data, 'USD'))
+            else:
+                await message.channel.send("No currency data!")
+
+        if message.content.startswith('$EUR-GBP'):
+            currency_data = data
+            if currency_data['status'] == "success":
+                await message.channel.send(build_message(currency_data, 'GBP'))
+            else:
+                await message.channel.send("No currency data!")
+
+        if message.content.startswith('$EUR-PLN'):
+            currency_data = data
+            if currency_data['status'] == "success":
+                await message.channel.send(build_message(currency_data, 'PLN'))
             else:
                 await message.channel.send("No currency data!")
 
