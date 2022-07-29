@@ -83,6 +83,22 @@ def main():
         if message.author == client.user:
             return
 
+        if message.content.startswith('$help'):
+            return_content = '''
+```diff
+---------------------[HELP]
+-Syntax:     [${BASE}-{TO}]
+-Example:        [$EUR-USD]
+---------------------------
++Available Base Currencies:
++                     [EUR]
++  Available To Currencies:
++           [EUR, GBP, PLN]
+---------------------------
+```
+'''
+            await message.channel.send(return_content)
+
         if message.content.startswith('$EUR-USD'):
             currency_data = data
             if currency_data['status'] == "success":
@@ -109,3 +125,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# TODO: OOP, RESERVED SPACE, MULTICURRENCY SUPPORT
