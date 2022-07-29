@@ -8,10 +8,19 @@ from datetime import datetime
 import requests
 from dotenv import load_dotenv
 
+# Set Environment Variables
+load_dotenv()
+
+# Set Default Values
+data = {}
+date = ""
+
+# Set Global Variable Date
 def set_date():
     global date
     date = datetime.now()
 
+# Get Fata From GetGeoApi Api
 def get_currency_data() -> object:
     set_date()
     parameters = {"api_key": os.getenv("API_KEY"), "format": "json", "amount": "1"}
@@ -22,6 +31,7 @@ def get_currency_data() -> object:
     json_response = json.loads(response.text)
     return json_response
 
+# Get Data Every 30 Minutes
 def get_data():
     start_time = time.time()
     while True:
@@ -34,6 +44,7 @@ def get_data():
             data = data
             time.sleep(1800.0 - ((time.time() - start_time) % 1800.0))
 
+# Build Response Message
 def build_message(json_data, currency) -> str:
     message = "```diff\n"
     if float(json_data['amount']) > float(json_data['rates'][currency]['rate']):
@@ -51,13 +62,11 @@ def build_message(json_data, currency) -> str:
     message += "```"
     return message
 
-data = {}
-date = ""
-
 def main():
-    load_dotenv()
     global data
     client = discord.Client()
+
+    # Get data every 30 minutes
     t = threading.Thread(target=get_data)
     t.start()
 
