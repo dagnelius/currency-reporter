@@ -3,15 +3,15 @@ import discord
 import requests
 import json
 import time
-import multiprocessing
+import threading
 from dotenv import load_dotenv
 
 def get_currency_data() -> object:
     parameters = {"api_key": os.getenv("API_KEY"), "format": "json", "to": "USD", "amount": "1"}
     url = "https://api.getgeoapi.com/v2/currency/convert"
     response = requests.get(url, parameters)
-    data = json.loads(response.text)
-    return data
+    data_returned = json.loads(response.text)
+    return data_returned
 
 def get_data():
     start_time = time.time()
@@ -20,19 +20,19 @@ def get_data():
         data = get_currency_data()
         time.sleep(3600.0 - ((time.time() - start_time) % 3600.0))
 
-def build_currency_message(data) -> str:
+def build_currency_message(dataa) -> str:
     message = "```diff\n"
-    if float(data['amount']) > float(data['rates']['USD']['rate']):
+    if float(dataa['amount']) > float(dataa['rates']['USD']['rate']):
         message += "- [EUR: "
     else:
         message += "+ [EUR: "
-    message += data['amount']
+    message += dataa['amount']
     message += "]\n"
-    if float(data['amount']) > float(data['rates']['USD']['rate']):
+    if float(dataa['amount']) > float(dataa['rates']['USD']['rate']):
         message += "+ [USD: "
     else:
         message += "- [USD: "
-    message += data['rates']['USD']['rate']
+    message += dataa['rates']['USD']['rate']
     message += "]```"
     return message
 
@@ -40,9 +40,9 @@ data = {}
 def main():
     load_dotenv()
     global data
-    data = get_currency_data()
     client = discord.Client()
-    multiprocessing.Process(target=get_data)
+    t = threading.Thread(target=get_data)
+    t.start()
 
     @client.event
     async def on_ready():
