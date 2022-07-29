@@ -2,6 +2,8 @@ import os
 import discord
 import requests
 import json
+import time
+import multiprocessing
 from dotenv import load_dotenv
 
 def get_currency_data() -> object:
@@ -10,6 +12,13 @@ def get_currency_data() -> object:
     response = requests.get(url, parameters)
     data = json.loads(response.text)
     return data
+
+def get_data():
+    start_time = time.time()
+    while True:
+        global data
+        data = get_currency_data()
+        time.sleep(3600.0 - ((time.time() - start_time) % 3600.0))
 
 def build_currency_message(data) -> str:
     message = "```diff\n"
@@ -27,9 +36,13 @@ def build_currency_message(data) -> str:
     message += "]```"
     return message
 
+data = {}
 def main():
     load_dotenv()
+    global data
+    data = get_currency_data()
     client = discord.Client()
+    multiprocessing.Process(target=get_data)
 
     @client.event
     async def on_ready():
@@ -37,11 +50,12 @@ def main():
 
     @client.event
     async def on_message(message):
+        global data
         if message.author == client.user:
             return
 
         if message.content.startswith('$$$'):
-            currency_data = get_currency_data()
+            currency_data = data
             if currency_data['status'] == "success":
                 await message.channel.send(build_currency_message(currency_data))
             else:
